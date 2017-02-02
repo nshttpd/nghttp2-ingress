@@ -1,0 +1,76 @@
+{
+    "apiVersion": "extensions/v1beta1",
+    "kind": "Deployment",
+    "metadata": {
+        "labels": {
+          "app": "nghttp2-ingress"
+        },
+        "name": "nghttp2-ingress",
+        "namespace": "default"
+    },
+    "spec": {
+        "replicas": 3,
+        "minReadySeconds": 10,
+        "revisionHistoryLimit": 5,
+        "selector": {
+          "matchLabels": {
+            "app": "nghttp2-ingress"
+          }
+        },
+        "template": {
+            "metadata": {
+                "labels": {
+                    "app": "nghttp2-ingress"
+                }
+            },
+            "spec": {
+                "terminationGracePeriodSeconds": 60,
+                "containers": [
+                    {
+                        "name": "nghttp2",
+                        "image": "<image>",
+                        "command": [
+                            "/app/start"
+                        ],
+                        "resources": {
+                            "requests": {
+                                "cpu": "25m",
+                                "memory": "8Mi"
+                            },
+                            "limits": {
+                                "cpu": "50m",
+                                "memory": "32Mi"
+                            }
+                        },
+                        "ports": [
+                            {
+                                "containerPort": 8080,
+                                "protocol": "TCP"
+                            }
+                        ],
+                        "livenessProbe": {
+                            "httpGet": {
+                                "path": "/healthz",
+                                "port": 9090
+                            },
+                            "initialDelaySeconds": 15
+                        },
+                        "readinessProbe": {
+                            "httpGet": {
+                                "path": "/healthz",
+                                "port": 9090
+                            },
+                            "initialDelaySeconds": 8
+                        },
+                        "env": [
+                            {
+                              "name": "PYKUBE_KUBERNETES_SERVICE_HOST",
+                              "value": "kubernetes.default"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}
